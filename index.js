@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 8000
 
-mongoose.connect('mongodb+srv://admin:admin@vietidols.hwq7l.mongodb.net/vietidols?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true})
+mongoose.connect('mongodb+srv://giatuongtran:giatuongtran@vietidols.hwq7l.mongodb.net/vietidols?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true})
     .then(() => app.listen(PORT, () => console.log(`Server running on port ${PORT}`)))
     .catch((error) => console.log(error.message))
 
