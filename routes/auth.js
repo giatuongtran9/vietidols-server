@@ -1,21 +1,12 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
-import { Users } from '../models/Users'
-import { check, validationResult } from 'express-validator'
+import { Users } from '../models/Users.js'
 
 const router = express.Router()
 
 //SignUp
 router.post('/signup',
-    [
-        check('name', 'Name is required').not().isEmpty(),
-        check('password', 'Please enter a password with 3 or more characters').isLength({min: 3})
-    ],
     async (req, res) => {
-        const errors = validationResult(req)
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() })
-        }
 
         try {
             let user = await Users.findOne({ name: req.body.name})
@@ -42,7 +33,7 @@ router.post('/signup',
 router.post('/signin', async (req, res) => {
     try {
         let user = await Users.findOne({name: req.body.name})
-
+        
         if (!user) {
             return res.status(400).json({ errors: 'Invalid Credentials'})
         }
@@ -50,7 +41,7 @@ router.post('/signin', async (req, res) => {
         const isMatch = user.password === req.body.password ? true : false
 
         if (!isMatch) {
-            return res.status(400).json({ errors: 'Invalid Credentials'})
+            return res.status(401).json({ errors: 'Invalid Credentials'})
         }
 
         const payload = {
