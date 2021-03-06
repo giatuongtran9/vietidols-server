@@ -111,7 +111,7 @@ router.get('/verify-account/:userId/:secretCode', async (req, res) => {
 
             await Code.deleteMany({ email: user.name })
 
-            res.redirect(`http://localhost:3000/signup`)
+            res.redirect(`https://vietidols`)
         }
     } catch (error) {
         res.status(404).json({ errors: error.message})
