@@ -1,12 +1,13 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import cryptoRandomString from 'crypto-random-string'
+import dotenv from 'dotenv'
 import { Users } from '../models/Users.js'
 import { Code } from '../models/secretCode.js'
 import emailService from '../utils/nodemailer.js'
 
 const router = express.Router()
-
+dotenv.config()
 //SignUp
 router.post('/signup',
     async (req, res) => {
@@ -18,7 +19,7 @@ router.post('/signup',
                 return res.status(400).json({ errors: 'Email is registered already'})
             }
 
-            newUser = new Users({
+            const newUser = new Users({
                 name: req.body.name,
                 password: req.body.password
             })
@@ -89,5 +90,32 @@ router.post('/signin', async (req, res) => {
     }
 })
 
+
+// Verify user's email 
+router.get('/verify-account/:userId/:secretCode', async (req, res) => {
+    try {
+        const user = await Users.findById(req.params.userId)
+
+        const user_secretCode = await Code.findOne({
+            email: user.name,
+            code: req.params.secretCode
+        })
+
+        if (!user) {
+            res.sendStatus(401)
+        } else {
+            await user.updateOne({
+                name: user.name,
+                status: 'active'
+            })
+
+            await Code.deleteMany({ email: user.name })
+
+            res.redirect(`http://localhost:3000/signup`)
+        }
+    } catch (error) {
+        res.status(404).json({ errors: error.message})
+    }
+})
 
 export default router
