@@ -1,4 +1,7 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const emailService = nodemailer.createTransport({
     service: 'gmail',
@@ -8,4 +11,4 @@ const emailService = nodemailer.createTransport({
     }
 });
 
-module.exports = emailService
+export default emailService
