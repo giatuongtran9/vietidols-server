@@ -13,6 +13,14 @@ const UsersSchema = new mongoose.Schema({
     role: {
         type: String,
         default: 'user'
+    },
+    status: {
+        type: String,
+        default: 'pending'
+    },
+    dateCreated: {
+        type: Date,
+        default: Date.now()
     }
 })
 
