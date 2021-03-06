@@ -1,6 +1,9 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
+import cryptoRandomString from 'crypto-random-string'
 import { Users } from '../models/Users.js'
+import { Code } from '../models/secretCode.js'
+import emailService from '../utils/nodemailer.js'
 
 const router = express.Router()
 
@@ -12,17 +15,40 @@ router.post('/signup',
             let user = await Users.findOne({ name: req.body.name})
 
             if (user) {
-                return res.status(400).json({ errors: 'User already exists'})
+                return res.status(400).json({ errors: 'Email is registered already'})
             }
 
-            user = new Users({
+            newUser = new Users({
                 name: req.body.name,
                 password: req.body.password
             })
 
-            await user.save()
+            const users = await newUser.save()
+            
+            const secretCode = cryptoRandomString({ length: 6 })
 
-            res.send({ message: 'User was registered successfully'})
+            const newCode = new Code({
+                code: secretCode,
+                email: users.name
+            })
+
+            await newCode.save()
+
+            const mailOption = {
+                from: process.env.EMAIL_USERNAME,
+                to: users.name,
+                subject: "Activation Link to VietIdols",
+                text: `Please click on the following link within the next 20 minutes to activate your account on VietIdols: ${process.env.BASE_URL}/auth/verify-account/${users._id}/${secretCode}`,
+                html: `<p>Please click on the following link within the next 20 minutes to activate your account on VietIdols: <strong><a href="${process.env.BASE_URL}/auth/verify-account/${users._id}/${secretCode}" target="_blank">Link</a></strong></p>`
+            }
+
+            await emailService.sendMail(mailOption)
+
+            res.json({
+                userRole: users.role,
+                userId: users._id,
+                userStatus: users.status
+            })
         } catch (error) {
             res.status(404).json({ errors: error.message})
         }
@@ -62,5 +88,6 @@ router.post('/signin', async (req, res) => {
         res.status(404).json({ errors: error.message})
     }
 })
+
 
 export default router
