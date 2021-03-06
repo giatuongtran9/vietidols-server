@@ -15,3 +15,5 @@ const secretCode = new mongoose.Schema({
         expires: 1200
     }
 })
+
+export const Code = mongoose.model('Code', secretCode)
