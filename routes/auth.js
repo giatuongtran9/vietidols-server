@@ -4,7 +4,7 @@ import cryptoRandomString from "crypto-random-string";
 import dotenv from "dotenv";
 import { Users } from "../models/Users.js";
 import { Code } from "../models/secretCode.js";
-import emailService from "../utils/nodemailer.js";
+import sendMail from "../utils/sendMail.js";
 
 const router = express.Router();
 dotenv.config();
@@ -33,15 +33,7 @@ router.post("/signup", async (req, res) => {
 
     await newCode.save();
 
-    const mailOption = {
-      from: process.env.EMAIL_USERNAME,
-      to: users.name,
-      subject: "Activation Link to VietIdols",
-      text: `Please click on the following link within the next 20 minutes to activate your account on VietIdols: ${process.env.BASE_URL}/auth/verify-account/${users._id}/${secretCode}`,
-      html: `<p>Please click on the following link within the next 20 minutes to activate your account on VietIdols: <strong><a href="${process.env.BASE_URL}/auth/verify-account/${users._id}/${secretCode}" target="_blank">Link</a></strong></p>`,
-    };
-
-    await emailService.sendMail(mailOption);
+    await sendMail(users.name, users._id, secretCode);
 
     res.json({
       userRole: users.role,
@@ -97,7 +89,7 @@ router.get("/verify-account/:userId/:secretCode", async (req, res) => {
       code: req.params.secretCode,
     });
 
-    if (!user) {
+    if (!user || !user_secretCode) {
       res.sendStatus(401);
     } else {
       await user.updateOne({
@@ -107,7 +99,7 @@ router.get("/verify-account/:userId/:secretCode", async (req, res) => {
 
       await Code.deleteMany({ email: user.name });
 
-      res.redirect(`https://vietidols`);
+      res.sendStatus(200);
     }
   } catch (error) {
     res.status(404).json({ errors: error.message });
