@@ -1,6 +1,5 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import cryptoRandomString from "crypto-random-string";
 import dotenv from "dotenv";
 import { Users } from "../models/Users.js";
 import { Code } from "../models/secretCode.js";
@@ -8,6 +7,7 @@ import sendMail from "../utils/sendMail.js";
 
 const router = express.Router();
 dotenv.config();
+
 //SignUp
 router.post("/signup", async (req, res) => {
   try {
@@ -24,16 +24,7 @@ router.post("/signup", async (req, res) => {
 
     const users = await newUser.save();
 
-    const secretCode = cryptoRandomString({ length: 6 });
-
-    const newCode = new Code({
-      code: secretCode,
-      email: users.name,
-    });
-
-    await newCode.save();
-
-    await sendMail(users.name, users._id, secretCode);
+    await sendMail(users.name, users._id);
 
     res.json({
       userRole: users.role,
@@ -99,6 +90,22 @@ router.get("/verify-account/:userId/:secretCode", async (req, res) => {
 
       await Code.deleteMany({ email: user.name });
 
+      res.sendStatus(200);
+    }
+  } catch (error) {
+    res.status(404).json({ errors: error.message });
+  }
+});
+
+router.get("/send-link/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    console.log(user);
+
+    if (!user) {
+      res.sendStatus(401);
+    } else {
+      await sendMail(user.name, user._id);
       res.sendStatus(200);
     }
   } catch (error) {
