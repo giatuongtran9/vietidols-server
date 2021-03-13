@@ -187,7 +187,7 @@ router.post('/resetuserpassword', async (req, res) => {
         res.status(404).json({ errors: error.message})
     }
 })
-
+// send reset password email
 async function sendresetPasswordEmail(useremail,token){
     try{    
         const resetPasswordURL = `${process.env.CLIENT_URL}/resetuserpassword?token=${token}&username=${useremail}` 
