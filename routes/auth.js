@@ -25,13 +25,10 @@ router.post('/signup',
             let hashPass = bcrypt.hashSync(req.body.password,saltRounds)
             console.log("password before has "+req.body.password)
             console.log("password after hash "+hashPass)
-            user = new Users({
-                name: req.body.name,
-                password: hashPass
-            })
+         
             const newUser = new Users({
                 name: req.body.name,
-                password: req.body.password
+                password: hashPass
             })
 
             const users = await newUser.save()
