@@ -1,9 +1,20 @@
 import emailService from "./nodemailer.js";
 import dotenv from "dotenv";
+import cryptoRandomString from "crypto-random-string";
+import { Code } from "../models/secretCode.js";
 
 dotenv.config();
 
-const sendMail = async (name, id, secretCode) => {
+const sendMail = async (name, id) => {
+  const secretCode = cryptoRandomString({ length: 6 });
+
+  const newCode = new Code({
+    code: secretCode,
+    email: name,
+  });
+
+  await newCode.save();
+
   const mailOption = {
     from: process.env.EMAIL_USERNAME,
     to: name,
